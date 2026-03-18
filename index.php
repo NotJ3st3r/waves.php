@@ -1,4 +1,12 @@
 <?php
+
+// vardump formatting
+function vardump($content){
+    echo("<pre>");
+    var_dump($content);
+    echo("</pre>");
+}
+
 function pathGenerator(
     int $width = 1000,
     int $height = 100,
@@ -133,7 +141,7 @@ function generatePalette(
 }
 
 // IMPORTANT: Since the color generator is currently only capable of generating five colors, it is not possible to increase the number of lines
-function giveBackground(){
+function Background(){
     $colors = generatePalette([120, 120, 120]);
     // $colors = generatePalette();
 
@@ -155,5 +163,3 @@ function giveBackground(){
     }
     echo('</div>');
 }
-
-giveBackground();
