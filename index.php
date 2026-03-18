@@ -1,61 +1,43 @@
 <?php
 // Generates a svg path
-function pathGenerator(){
-    // max width of the path
-    $width = 1000;
-    // max height of the path
-    $height = 100;
+function pathGenerator(
+    int $width = 1000,
+    int $height = 100,
+    int $segments = 9,
+    array $yRange = [30, 70]
+): string {
+    $points = [];
 
-    // empty string to store the path in
-    $path = "";
-    // first point of the path with a random height
-    $firstPoint = "M0 " . rand(30, 70) . " ";
-    // ending of the path with the cloing loop to the start
-    $lastPoint = "L" . $width . " 100 L0 100Z ";
+    // Generate curve points
+    for ($i = 0; $i < $segments; $i++) {
+        $progress = ($i + 1) / $segments;
 
-    // array to store the svg path points in
-    // ToDo: variable length of the path
-    $points = [
-        $first = [],
-        $second = [],
-        $third = [],
-        $fourth = [],
-        $fifth = [],
-        $sixth = [],
-        $seventh = [],
-        $eighth = [],
-        $nineth = []
-    ];
+        $x = (int) round($progress * $width);
+        $y = rand($yRange[0], $yRange[1]);
 
-    // Generate a number of bézier curves from the current position to x,y with x2,y2 as the end control point and a reflection of the previous curve command's end control point as the start control point
-    for ($i=0; $i < count($points); $i++) {
-        // $x
-        // $x = ($i * ($width / (count($points) + 1))) + rand(75, 125);
-        $x = ($i * ($width / (count($points)))) + rand(75, 125);
-        // $y
-        $y = rand(30, 70);
-        // $x2
-        $x2 = $x + rand(-50, -25);
-        // $y2
+        // Control point slightly before end point
+        $x2 = $x - rand(25, 50);
         $y2 = $y + rand(-20, 20);
-        // add the generated points to the array
-        $points[$i] = [$x2, $y2, $x, $y];
+
+        $points[] = [$x2, $y2, $x, $y];
     }
 
-    // edit the last path point to be on the right edge of the svg
+    // Ensure last point is exactly at right edge
     $points[array_key_last($points)][2] = $width;
-    $points[array_key_last($points)][3] = rand(30, 70);
 
-    // add the points in the array to the path variable and format it as a functioning svg path
-    for ($i=0; $i < count($points); $i++) { 
-        $path .= "S" . $points[$i][0] . " " . $points[$i][1] . " " . $points[$i][2] . " " . $points[$i][3] . " ";
+    // Start path
+    $startY = rand($yRange[0], $yRange[1]);
+    $path = "M0 {$startY} ";
+
+    // Add smooth curves
+    foreach ($points as [$x2, $y2, $x, $y]) {
+        $path .= "S{$x2} {$y2} {$x} {$y} ";
     }
 
-    // add the starting and ending points in front and at the end of the path string
-    $path = $firstPoint . $path . $lastPoint;
+    // Close shape at bottom
+    $path .= "L{$width} {$height} L0 {$height} Z";
 
-    // retunr the generated path
-    return $path;
+    return trim($path);
 }
 
 // Converts a given RGB color to the according HSV representation
