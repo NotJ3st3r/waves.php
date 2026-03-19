@@ -140,26 +140,32 @@ function generatePalette(
     return $palette;
 }
 
-// IMPORTANT: Since the color generator is currently only capable of generating five colors, it is not possible to increase the number of lines
-function Background(){
-    $colors = generatePalette([120, 120, 120]);
-    // $colors = generatePalette();
+function Background(int $steps = 5) {
+    $colors = generatePalette(startColor: [120, 120, 120], steps: $steps);
+    $styling = '<style>.background{overflow:hidden;position:fixed;inset:0;z-index:-10;display:flex;flex-flow:column nowrap;justify-content: space-evenly}.background > .layer{display:grid;align-items:end}.background > .layer > svg{transform:translateY(1px)}</style>';
 
-    $styling = '<style>.background{overflow:hidden;position:fixed;inset:0;z-index:-10;display:grid;}.background > .layer{display:grid;align-items:end}.background > .layer > svg{transform:translateY(1px)}</style>';
+    echo $styling;
+    echo '<div class="background">';
 
-    echo($styling);
-    echo('<div class="background">');
-    for ($line=0; $line < 4; $line++) { 
-        echo('
-        <div class="layer" style="background-color: hsl(' . $colors[$line][0] . ', ' . $colors[$line][1] . '%, ' . $colors[$line][2] . '%)">
-            <svg id="visual" viewBox="0 0 1000 100" xmlns="http://www.w3.org/2000/svg"
-                xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1">
+    $layers = count($colors) - 1;
+
+    for ($line = 0; $line < $layers; $line++) {
+        [$h1, $s1, $l1] = $colors[$line];
+        [$h2, $s2, $l2] = $colors[$line + 1];
+
+        echo '
+        <div class="layer">
+            <div style="position: fixed;height: 100%;width: 100%;background-color: hsl(' . $h1 . ', ' . $s1 . '%, ' . $l1 . '%);z-index: -' . $line . ';"></div>
+            <svg id="visual-' . $line . '" viewBox="0 0 1000 100" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
                 <path
-                    d=" ' . pathGenerator() . ' "
-                    fill=" hsl(' . $colors[($line + 1)][0] . ', ' . $colors[($line + 1)][1] . '%, ' . $colors[($line + 1)][2] . '%)" stroke-linecap="round" stroke-linejoin="miter"></path>
+                    d="' . pathGenerator() . '"
+                    fill="hsl(' . $h2 . ', ' . $s2 . '%, ' . $l2 . '%)"
+                    stroke-linecap="round"
+                    stroke-linejoin="miter">
+                </path>
             </svg>
-        </div>
-        ');
+        </div>';
     }
-    echo('</div>');
+    echo '<div style="position: fixed;height: 100%;width: 100%;background-color: hsl(' . $h2 . ', ' . $s2 . '%, ' . $l2 . '%);z-index: -' . $line . ';"></div>';
+    echo '</div>';
 }
