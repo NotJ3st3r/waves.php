@@ -100,7 +100,7 @@ function rgbToHsl(
 function generatePalette(
     ?array $startColor = null,
     int $steps = 5,
-    int $hueStep = 12,
+    int $hueStep = 8,
     int $lightnessDrop = 8
 ): array {
     // Clamp helper
@@ -140,8 +140,12 @@ function generatePalette(
     return $palette;
 }
 
-function Background(int $steps = 5) {
-    $colors = generatePalette(startColor: [120, 120, 120], steps: $steps);
+function Background(
+    ?array $startColor = null,
+    ?int $steps = 5
+): void {
+    // $colors = generatePalette(startColor: [120, 120, 120], steps: $steps);
+    $colors = generatePalette(startColor: $startColor, steps: $steps);
 
     // $styling = '<style>.background{overflow:hidden;position:fixed;inset:0;z-index:-10;display:grid;}.background > .layer{display:grid;align-items:end}.background > .layer > svg{transform:translateY(1px)}</style>';
     $styling = '<style>.background{overflow:hidden;position:fixed;inset:0;z-index:-10;display:flex;flex-flow:column nowrap;justify-content: space-evenly;}.background > .layer{display:grid;align-items:end;}.background .filler{position: fixed;height: 100%;width: 100%;}.background > .layer > svg{transform:translateY(1px);}</style>';
