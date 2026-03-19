@@ -142,7 +142,9 @@ function generatePalette(
 
 function Background(int $steps = 5) {
     $colors = generatePalette(startColor: [120, 120, 120], steps: $steps);
-    $styling = '<style>.background{overflow:hidden;position:fixed;inset:0;z-index:-10;display:flex;flex-flow:column nowrap;justify-content: space-evenly}.background > .layer{display:grid;align-items:end}.background > .layer > svg{transform:translateY(1px)}</style>';
+
+    // $styling = '<style>.background{overflow:hidden;position:fixed;inset:0;z-index:-10;display:grid;}.background > .layer{display:grid;align-items:end}.background > .layer > svg{transform:translateY(1px)}</style>';
+    $styling = '<style>.background{overflow:hidden;position:fixed;inset:0;z-index:-10;display:flex;flex-flow:column nowrap;justify-content: space-evenly;}.background > .layer{display:grid;align-items:end;}.background .filler{position: fixed;height: 100%;width: 100%;}.background > .layer > svg{transform:translateY(1px);}</style>';
 
     echo $styling;
     echo '<div class="background">';
@@ -155,7 +157,7 @@ function Background(int $steps = 5) {
 
         echo '
         <div class="layer">
-            <div style="position: fixed;height: 100%;width: 100%;background-color: hsl(' . $h1 . ', ' . $s1 . '%, ' . $l1 . '%);z-index: -' . $line . ';"></div>
+            <div class="filler" style="background-color: hsl(' . $h1 . ', ' . $s1 . '%, ' . $l1 . '%);z-index: -' . $line . ';"></div>
             <svg id="visual-' . $line . '" viewBox="0 0 1000 100" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
                 <path
                     d="' . pathGenerator() . '"
@@ -166,6 +168,6 @@ function Background(int $steps = 5) {
             </svg>
         </div>';
     }
-    echo '<div style="position: fixed;height: 100%;width: 100%;background-color: hsl(' . $h2 . ', ' . $s2 . '%, ' . $l2 . '%);z-index: -' . $line . ';"></div>';
+    echo '<div class="filler" style="background-color: hsl(' . $h2 . ', ' . $s2 . '%, ' . $l2 . '%);z-index: -' . $line . ';"></div>';
     echo '</div>';
 }
