@@ -1,12 +1,4 @@
 <?php
-
-// vardump formatting
-function vardump($content){
-    echo("<pre>");
-    var_dump($content);
-    echo("</pre>");
-}
-
 function pathGenerator(
     int $width = 1000,
     int $height = 100,
