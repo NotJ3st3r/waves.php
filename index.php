@@ -1,11 +1,13 @@
 <?php
 function pathGenerator(
     int $width = 1000,
-    int $height = 100,
+    int $height = 50,
     int $segments = 9,
-    array $yRange = [30, 70]
+    array $yRange = [0.25, 0.75]
 ): string {
     $points = [];
+    $yRange[0] = $height * $yRange[0];
+    $yRange[1] = $height * $yRange[1];
 
     // Generate curve points
     for ($i = 0; $i < $segments; $i++) {
@@ -15,7 +17,7 @@ function pathGenerator(
         $y = rand($yRange[0], $yRange[1]);
 
         // Control point slightly before end point
-        $x2 = $x - rand(25, 50);
+        $x2 = $x - rand(25, 50) + rand(-10, 10);
         $y2 = $y + rand(-20, 20);
 
         $points[] = [$x2, $y2, $x, $y];
@@ -93,53 +95,57 @@ function generatePalette(
     ?array $startColor = null,
     int $steps = 5,
     int $hueStep = 8,
-    int $lightnessDrop = 8
+    int $maxSaturationDrop = 15,
+    int $maxLightnessDrop = 30
 ): array {
-    // Clamp helper
     $clamp = fn($v, $min, $max) => max($min, min($max, $v));
 
-    // Base color (HSL)
     if ($startColor === null) {
-        $H = random_int(0, 359);      // Hue
-        $S = random_int(55, 75);      // Saturation
-        $L = random_int(50, 70);      // Lightness
+        $H = random_int(0, 359);
+        $S = random_int(55, 75);
+        $L = random_int(50, 70);
     } else {
         [$r, $g, $b] = $startColor;
-        [$H, $S, $L] = rgbToHsl($r, $g, $b); // Convert input RGB to HSL
+        [$H, $S, $L] = rgbToHsl($r, $g, $b);
     }
 
     $palette = [];
 
+    // Prevent division by zero
+    $tMax = max(1, $steps - 1);
+
     for ($i = 0; $i < $steps; $i++) {
+        $t = $i / $tMax; // normalized 0 -> 1
 
         if ($S < 5) {
-            // Grayscale handling
-            $h = $H; // Hue irrelevant
+            // grayscale: only lightness changes
+            $h = $H;
             $s = 0;
-            $l = $clamp($L - ($i * 10), 3, 90);
+            $l = $clamp($L - ($t * 40), 3, 90);
         } else {
-            // Normal analogous behavior
-            $h = ($H + ($i * $hueStep)) % 360;
-            $s = $clamp($S - $i * 2, 40, 100);
-            $l = $clamp($L - $i * $lightnessDrop, 20, 100);
+            // Hue progression
+            $h = ($H - ($i * $hueStep)) % 360;
+
+            // Distribute total drop across steps
+            $s = $clamp($S - ($t * $maxSaturationDrop), 40, 100);
+            $l = $clamp($L - ($t * $maxLightnessDrop), 20, 100);
         }
 
-        // [$r, $g, $b] = hslToRgb($h, $s, $l); // Convert HSL to RGB for output
-        // $palette[] = [$r, $g, $b];
-        $palette[] = [$h, $s, $l];
+        $palette[] = [
+            (int) round($h),
+            (int) round($s),
+            (int) round($l)
+        ];
     }
-
     return $palette;
 }
 
 function Background(
     ?array $startColor = null,
-    ?int $steps = 5
+    ?int $steps = 5,
+    ?int $waveHeight = 50
 ): void {
-    // $colors = generatePalette(startColor: [120, 120, 120], steps: $steps);
     $colors = generatePalette(startColor: $startColor, steps: $steps);
-
-    // $styling = '<style>.background{overflow:hidden;position:fixed;inset:0;z-index:-10;display:grid;}.background > .layer{display:grid;align-items:end}.background > .layer > svg{transform:translateY(1px)}</style>';
     $styling = '<style>.background{overflow:hidden;position:fixed;inset:0;z-index:-10;display:flex;flex-flow:column nowrap;justify-content: space-evenly;}.background > .layer{display:grid;align-items:end;}.background .filler{position: fixed;height: 100%;width: 100%;}.background > .layer > svg{transform:translateY(1px);}</style>';
 
     echo $styling;
@@ -154,9 +160,9 @@ function Background(
         echo '
         <div class="layer">
             <div class="filler" style="background-color: hsl(' . $h1 . ', ' . $s1 . '%, ' . $l1 . '%);z-index: -' . $line . ';"></div>
-            <svg id="visual-' . $line . '" viewBox="0 0 1000 100" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
+            <svg id="visual-' . $line . '" viewBox="0 0 1000 ' . $waveHeight . '" xmlns="http://www.w3.org/2000/svg" preserveAspectRatio="none">
                 <path
-                    d="' . pathGenerator() . '"
+                    d="' . pathGenerator(height: $waveHeight) . '"
                     fill="hsl(' . $h2 . ', ' . $s2 . '%, ' . $l2 . '%)"
                     stroke-linecap="round"
                     stroke-linejoin="miter">
